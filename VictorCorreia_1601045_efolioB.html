@@ -1,0 +1,229 @@
+<!--
+    E-fólio B
+    UC: 21020 - Computação Gráfica
+    Docente: António Araújo
+    Aluno: Victor Correia
+    Nº: 1601045
+-->
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <style>
+        body {
+             margin: 0;
+        }
+        #c {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+    </style>
+</head>
+<body onload = init()>
+    <canvas id="c">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.js"></script> 
+    <script>
+        var renderer, camera, scene;
+
+        // Definições para os viewports
+			var views = [
+				{                   
+					left: 0.01,
+					bottom: 0.02,
+					width: 0.48,
+					height: 0.97,
+					eye: [ 0, 300, 1800 ],
+					up: [ 0, 1, 0 ],
+					fov: 30,
+                    updateCamera: function ( camera, scene) {
+					  camera.position.set(100,0,0)
+					  camera.lookAt( 0,0,0 );
+					}
+				},
+				{
+					left: 0.51,
+					bottom: 0.02,
+					width: 0.48,
+					height: 0.48,
+					eye: [ 0, 1800, 0 ],
+					up: [ 0, 0, 1 ],
+					fov: 45,
+                    updateCamera: function ( camera, scene) {
+                        camera.position.set(0,150,0)
+					    camera.lookAt( 0,0,0 );
+					}
+				},
+				{
+					left: 0.51,
+					bottom: 0.51,
+					width: 0.48,
+					height: 0.48,
+					eye: [ 1400, 800, 1400 ],
+					up: [ 0, 1, 0 ],
+					fov: 60,
+                    updateCamera: function ( camera, scene) {
+                        camera.position.set(30,30,30)
+					    camera.lookAt( 0,0,0 );
+					}
+				}
+			];
+
+
+        function init() {
+            var canvas = document.querySelector('#c');
+            renderer = new THREE.WebGLRenderer({canvas});    
+            camera = new THREE.PerspectiveCamera(40, 2, 0.1, 1000);
+            scene = new THREE.Scene();
+            
+            // Adição de fonte de luz pontual
+            var plight = new THREE.PointLight({color: 0xFFFFFF}, 3);
+            scene.add(plight);
+   
+            // Definição de um array para conter os diversos objetos que irão ser criados
+            var objects = [];
+            
+            /***************** Criação dos objetos (planetas e Sol) ******************************/
+            var sphereGeometry = new THREE.SphereBufferGeometry(1, 30, 30);
+    
+            var solarSystem = new THREE.Object3D();
+            scene.add(solarSystem);
+            objects.push(solarSystem);
+    
+            var sunMaterial = new THREE.MeshPhongMaterial({emissive: 0xFFFF00});
+            var sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
+            sunMesh.scale.set(10, 10, 10);
+            solarSystem.add(sunMesh);
+            objects.push(sunMesh);
+
+            var mercuryOrbit = new THREE.Object3D();
+            mercuryOrbit.position.x = 12;
+            solarSystem.add(mercuryOrbit);
+            objects.push(mercuryOrbit);
+    
+            var mercuryMaterial = new THREE.MeshPhongMaterial({color: 0x704A4A, emissive: 0x330b11});
+            var mercuryMesh = new THREE.Mesh(sphereGeometry, mercuryMaterial);
+            mercuryMesh.scale.set(.38, .38, .38);
+            mercuryOrbit.add(mercuryMesh);
+            objects.push(mercuryMesh);
+
+            var venusOrbit = new THREE.Object3D();
+            venusOrbit.position.x = 22;
+            solarSystem.add(venusOrbit);
+            objects.push(venusOrbit);
+    
+            var venusMaterial = new THREE.MeshPhongMaterial({color: 0x704A4A, emissive: 0x330b11});
+            var venusMesh = new THREE.Mesh(sphereGeometry, venusMaterial);
+            venusMesh.scale.set(.95, .95, .95);
+            venusOrbit.add(venusMesh);
+            objects.push(venusMesh);
+    
+            var earthOrbit = new THREE.Object3D();
+            earthOrbit.position.x = 34;
+            solarSystem.add(earthOrbit);
+            objects.push(earthOrbit);
+    
+            var earthMaterial = new THREE.MeshPhongMaterial({color: 0x2233FF, emissive: 0x112244});
+            var earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+            earthOrbit.add(earthMesh);
+            objects.push(earthMesh);
+    
+            var moonOrbit = new THREE.Object3D();
+            moonOrbit.position.x = 4;
+            earthOrbit.add(moonOrbit);
+    
+            var moonMaterial = new THREE.MeshPhongMaterial({color: 0x888888, emissive: 0x222222});
+            var moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+            moonMesh.scale.set(.27, .27, .27);
+            moonOrbit.add(moonMesh);
+            objects.push(moonMesh);
+            /************************************************************************************************************/
+
+            // Criação do efeito estrelas
+            var starGeo = new THREE.Geometry();
+            for(var i=0;i<6000;i++) {
+                var star = new THREE.Vector3(
+                Math.random() * 600 - 300,
+                Math.random() * 600 - 300,
+                Math.random() * 600 - 300
+                );
+                starGeo.vertices.push(star);
+            }  
+            var starMaterial = new THREE.PointsMaterial({
+                color: 0xaaaaaa,
+                size: 0.3,
+            });        
+            var stars = new THREE.Points(starGeo,starMaterial);
+            scene.add(stars);
+            
+            // Criação de texto
+            var loader = new THREE.FontLoader();
+				loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+      				var geometry = new THREE.TextGeometry( "Partial Solar System", {
+        				font: font,
+        				size: 10,
+        				height: 0.1,        				       				
+      				} );
+      				geometry.center();
+      				var material = new THREE.MeshNormalMaterial({transparent: true, opacity: 0.5});
+      				var mesh = new THREE.Mesh( geometry, material );
+					mesh.position.set(0,0,40);
+                    mesh.rotation.x = -0.5 * Math.PI;
+    				scene.add( mesh );
+    			} );
+
+            
+            function resizeRendererToDisplaySize(renderer) {
+                var canvas = renderer.domElement;
+                var width = canvas.clientWidth;
+                var height = canvas.clientHeight;
+                var needResize = canvas.width !== width || canvas.height !== height;
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+                return needResize;
+            }
+    
+            function render(time) {
+                time *= 0.001;
+				for (var i = 0; i < views.length; i++) {
+
+                    var view = views[i];
+				    view.updateCamera( camera, scene);
+
+                    var left = Math.floor(window.innerWidth * view.left);
+                    var bottom = Math.floor(window.innerHeight * view.bottom);
+                    var width = Math.floor(window.innerWidth * view.width);
+                    var height = Math.floor(window.innerHeight * view.height);
+
+                    renderer.setViewport(left, bottom, width, height);
+                    renderer.setScissor(left, bottom, width, height);
+                    renderer.setScissorTest(true);
+                    renderer.setClearColor( view.background );
+
+                    camera.aspect = width / height;
+                    camera.updateProjectionMatrix();
+                    renderer.render( scene, camera );
+                }
+
+                if (resizeRendererToDisplaySize(renderer)) {
+                    var canvas = renderer.domElement;
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                objects.forEach((obj) => {
+                    obj.rotation.y = time;
+                });
+                
+                renderer.render(scene, camera);
+    
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        }    
+    </script>
+</body>
+</html>
